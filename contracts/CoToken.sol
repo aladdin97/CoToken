@@ -1,7 +1,7 @@
 pragma solidity >=0.5.1;
 
-// not requires open-zeppelin installation 
-// npm install open-zeppelin was used 
+// requires open-zeppelin installation 
+// npm install openzeppelin-solidity was used 
 import "openzeppelin-solidity/contracts/token/ERC20/ERC20.sol";
 import "openzeppelin-solidity/contracts/ownership/Ownable.sol";
 
@@ -13,14 +13,14 @@ using SafeMath for uint256;
 
     function buyPrice(uint n) public view returns (uint){
         // assuming we still integrate continously
-        uint price = 5*(totalSupply() + n)*10**15 + 2*(totalSupply() + n)*10**17 - 5*(totalSupply())*10**15 - 2*(totalSupply())*10**17;
+        uint price = 5*(totalSupply() + n)*(totalSupply() + n)*10**15 + 2*(totalSupply() + n)*10**17 - 5*(totalSupply())*(totalSupply())*10**15 - 2*(totalSupply())*10**17;
         return price;
         // returns price in wei
     }
 
     function sellPrice(uint n) public view returns (uint){
         // assuming we still integrate continously
-        uint price = 5*(totalSupply())*10**15 + 2*(totalSupply())*10**17 - 5*(totalSupply() - n)*10**15 - 2*(totalSupply() - n)*10**17;
+        uint price = 5*(totalSupply())*(totalSupply())*10**15 + 2*(totalSupply())*10**17 - 5*(totalSupply() - n)*(totalSupply() - n)*10**15 - 2*(totalSupply() - n)*10**17;
         return price;
         // returns price in wei
     }
