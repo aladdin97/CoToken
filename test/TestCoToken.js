@@ -44,7 +44,7 @@ contract('CoToken', function (accounts) {
 
         let totalSupply = await CoTokenInstance.totalSupply()
         let balance = await CoTokenInstance.balanceOf(accounts[1])
-        await truffleAssert.reverts(CoTokenInstance.mint(accounts[1],100,{"from": accounts[1],"value":weiPrice}))
+        await truffleAssert.reverts(CoTokenInstance.mint(accounts[2],100,{"from": accounts[2],"value":weiPrice}))
         
       })
 
@@ -53,11 +53,15 @@ contract('CoToken', function (accounts) {
       // TESTING OF BURN FUNCTION
       it('should be able to burn tokens and update respective CoToken and Eth balances', async function () {
 
-        let weiPrice = await CoTokenInstance.buyPrice(5)
-        await CoTokenInstance.mint(accounts[0],5,{"from": accounts[0],"value":weiPrice})
+        let weiPrice = await CoTokenInstance.buyPrice(6)
+        await CoTokenInstance.mint(accounts[0],6,{"from": accounts[0],"value":weiPrice})
+
+        // store previous wei balance 
         let weiCo_PrevBalance = await CoTokenInstance.weiBalance(accounts[0])
 
-        await CoTokenInstance.burn(accounts[0], 5,{"from": accounts[0]})
+        let weiSellPrice = await CoTokenInstance.sellPrice(6)
+
+        await CoTokenInstance.burn(accounts[0], 6,{"from": accounts[0]})
 
         let totalSupply = await CoTokenInstance.totalSupply()
         let balance = await CoTokenInstance.balanceOf(accounts[0])
@@ -65,9 +69,13 @@ contract('CoToken', function (accounts) {
         let weiContractBalance = await CoTokenInstance.contractBalance()
         let weiCo_CurrentBalance = await CoTokenInstance.weiBalance(accounts[0])
         
-        let weiSellPrice = await CoTokenInstance.sellPrice(5)
+        
+        // psosition of weiSellPrice 
 
+        // compute difference in balance which should be "roughly" equal to sell price
         var weiCoDiff = weiCo_CurrentBalance-weiCo_PrevBalance
+
+        // convert to eth
         var ethCoBalance = weiCoDiff/1e18
         var ethBalance = weiContractBalance/1e18
         var ethSellPrice = weiSellPrice/1e18
@@ -76,7 +84,7 @@ contract('CoToken', function (accounts) {
         assert.equal(totalSupply.toNumber(),0,"totalSupply after burn is incorrect")
         assert.equal(ethBalance,0,"Eth contract balance was not correctly updated")
 
-        assert.equal(ethCoBalance.toFixed(3),ethSellPrice,"Co's Eth balance was not correctly updated")
+        assert.equal(ethCoBalance.toFixed(2),ethSellPrice,"Co's Eth balance was not correctly updated")
         // toFixed(3) is used to round off to 3 decimals to account for gas costs
       }) 
       
@@ -126,25 +134,19 @@ contract('CoToken', function (accounts) {
 
       it('should only destroy contract if the owner (Co) calls the destroy function', async function () {
 
-        let weiPrice = await CoTokenInstance.buyPrice(100)
-        await CoTokenInstance.mint(accounts[1],100,{"from": accounts[1],"value":weiPrice})
+        let weiPrice = await CoTokenInstance.buyPrice(50)
+        await CoTokenInstance.mint(accounts[1],50,{"from": accounts[1],"value":weiPrice})
+
+        let weiPrice_2 = await CoTokenInstance.buyPrice(50)
+        await CoTokenInstance.mint(accounts[1],50,{"from": accounts[2],"value":weiPrice_2})
+
 
 
         await truffleAssert.reverts(CoTokenInstance.destroy({"from": accounts[1]}))
         
       })
 
-    //   it('destroy function should destroy contract', async function () {
-    //     // minter is a public variable in the contract so you can get it directly via the created call function
-    //     let weiPrice = await CoTokenInstance.buyPrice(100)
-    //     await CoTokenInstance.mint(accounts[0],100,{"from": accounts[0],"value":weiPrice})
-
-
-    //     await CoTokenInstance.destroy({"from": accounts[0]})
-
-    //     await truffleAssert.reverts(CoTokenInstance.buyPrice(5))
-        
-    //   })
+   
 
 
 
